@@ -3,14 +3,18 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Tymon\JWTAuth\Contracts\JWTSubject;
+use Illuminate\Support\Facades\Auth;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasUuid;
 
     /**
      * The attributes that are mass assignable.
@@ -20,6 +24,9 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'gender',
+        'address',
+        'photo',
         'password',
     ];
 
@@ -43,6 +50,24 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+        ];
+    }
+
+        public function getJWTIdentifier(): string
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array<string, string>
+     */
+    public function getJWTCustomClaims(): array
+    {
+        return [
+            'uuid' => $this->uuid,
+            'email' => $this->email,
         ];
     }
 }

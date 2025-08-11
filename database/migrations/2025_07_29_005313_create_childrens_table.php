@@ -12,8 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('childrens', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->string('name');
+            $table->date('birth_date');
+            $table->string('gender');
+            $table->uuid('parent_id');
             $table->timestamps();
+        });
+
+        Schema::table('childrens', function (Blueprint $table) {
+            $table->foreign('parent_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
