@@ -11,12 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('growths', function (Blueprint $table) {
+        Schema::create('artikels', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('child_id')->constrained('childrens')->onDelete('cascade');
-            $table->decimal('weight', 5, 2)->nullable();
-            $table->decimal('height', 5, 2)->nullable();
-            $table->date('measurement_date')->nullable();
+            $table->string('title');
+            $table->text('content');
+            $table->string('image_url')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('growths');
+        Schema::dropIfExists('artikels');
     }
 };

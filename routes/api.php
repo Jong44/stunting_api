@@ -12,26 +12,33 @@ Route::get('/test', function () {
     return response()->json(['message' => 'Test route is working!']);
 });
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::prefix('auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/login', [AuthController::class, 'login']);
+});
 
-Route::middleware(['auth:api'])->group(function () {
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::post('/refresh', [AuthController::class, 'refresh']);
+Route::get('/children/{childId}/reports', [GrowthController::class, 'getGrowthReport']);
+Route::get('/children/parent/{parentId}', [ChildrenController::class, 'getChildrenByParentId']);
+Route::resource('users', UserController::class)
+    ->except(['create', 'edit'])
+    ->parameters(['users' => 'user:uuid']);
 
-    Route::resource('users', UserController::class)
-        ->except(['create', 'edit'])
-        ->parameters(['users' => 'user:uuid']);
+Route::resource('children', ChildrenController::class)
+    ->except(['create', 'edit'])
+    ->parameters(['children' => 'child:uuid']);
 
-    Route::resource('children', ChildrenController::class)
-        ->except(['create', 'edit'])
-        ->parameters(['children' => 'child:uuid']);
+Route::resource('growths', GrowthController::class)
+    ->except(['create', 'edit'])
+    ->parameters(['growths' => 'growth:uuid']);
 
-    Route::resource('growths', GrowthController::class)
-        ->except(['create', 'edit'])
-        ->parameters(['growths' => 'growth:uuid']);
+Route::middleware('auth:api')->group(function () {
+    Route::prefix('auth')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::post('/refresh', [AuthController::class, 'refresh']);
+    });
 
-    
+
+
 
 });
 

@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\GrowthRequest;
+use App\Models\Children;
 use App\Models\Growth;
+use App\Services\WHOZScoreCalculator;
 use Illuminate\Http\Request;
 
 class GrowthController extends Controller
@@ -48,20 +50,29 @@ class GrowthController extends Controller
     public function store(GrowthRequest $request)
     {
         try {
+            $child = Children::findOrFail($request->child_id);
+            if (!$child) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Child not found.',
+                ], 404);
+            }
             $growth = Growth::create($request->validated());
             if (!$growth) {
                 return response()->json([
+                    'success' => false,
                     'message' => 'Failed to create growth record.',
                 ], 500);
             }
             return response()->json([
+                'success' => true,
                 'data' => $growth,
                 'message' => 'Growth record created successfully.',
             ], 201);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => 'An error occurred while creating growth record.',
-                'error' => $e->getMessage(),
+                'success' => false,
+                'message' => $e->getMessage()
             ], 500);
         }
     }
@@ -120,4 +131,55 @@ class GrowthController extends Controller
             ], 500);
         }
     }
+
+    public function getGrowthReport(string $childId)
+{
+    try {
+        $child = Children::with('growths')->find($childId);
+
+        if (!$child || $child->growths->isEmpty()) {
+            return response()->json([
+                'message' => 'No growth records found for this child.',
+            ], 404);
+        }
+
+        $csvPath = storage_path('app/data/lhfa-boys-zscore-expanded-tables.csv');
+        $whoData = WHOZScoreCalculator::loadDataFromCSV($csvPath);
+
+        $growthData = $child->growths->map(function ($growth) use ($child, $whoData) {
+            // hitung usia dalam hari dari tanggal lahir sampai tanggal measurement
+            $ageInDays = \Carbon\Carbon::parse($child->birth_date)
+                ->diffInDays(\Carbon\Carbon::parse($growth->measurement_date));
+
+            $resultZScore = WHOZScoreCalculator::hitungZScoreUntukUsia(
+                $growth->height,
+                $ageInDays,
+                $whoData
+            );
+            return [
+                'weight' => $growth->weight,
+                'height' => $growth->height,
+                'age_in_months' => floor($ageInDays / 30),
+                'z_score' => $resultZScore['z_score'],
+                'status' => $resultZScore['status'],
+                'measurement_date' => $growth->measurement_date
+            ];
+        });
+
+
+
+        return response()->json([
+            'success' => true,
+            'data' => $growthData,
+            'message' => 'Growth report retrieved successfully.',
+        ], 200);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => $e->getMessage(),
+        ], 500);
+    }
+}
+
 }

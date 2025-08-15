@@ -10,9 +10,9 @@ class Growth extends Model
     use HasUuid;
 
     protected $fillable = [
+        'child_id',
         'weight',
         'height',
-        'head_circumference',
         'measurement_date',
     ];
 

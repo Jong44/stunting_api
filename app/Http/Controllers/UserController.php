@@ -70,13 +70,15 @@ class UserController extends Controller
      */
     public function show(string $id)
     {
-        $user = User::with('children.growths')->find($id);
+        $user = User::find($id);
         if (!$user) {
             return response()->json([
+                'success' => false,
                 'message' => 'User not found.',
             ], 404);
         }
         return response()->json([
+            'success' => true,
             'data' => $user,
             'message' => 'User details retrieved successfully.',
         ], 200);
@@ -98,6 +100,7 @@ class UserController extends Controller
         $user = User::find($id);
         if (!$user) {
             return response()->json([
+                'success' => false,
                 'message' => 'User not found.',
             ], 404);
         }
@@ -105,11 +108,13 @@ class UserController extends Controller
         try {
             $user->update($request->validated());
             return response()->json([
+                'success' => true,
                 'data' => $user,
                 'message' => 'User updated successfully.',
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
+                'success' => false,
                 'message' => 'An error occurred while updating the user.',
                 'error' => $e->getMessage(),
             ], 500);

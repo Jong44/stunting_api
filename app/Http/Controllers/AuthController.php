@@ -25,11 +25,14 @@ class AuthController extends Controller
         ]);
 
         return response()->json([
+            'success' => true,
             'message' => 'User registered successfully!',
-            'user' => $user->only(['id', 'name', 'email']),
+            'data' => $user->only(['id', 'name', 'email']),
         ], 201);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Registration failed'], 500);
+            return response()->json([
+
+                'error' => 'Registration failed'], 500);
         }
     }
     public function login(LoginRequest $request)
@@ -41,14 +44,22 @@ class AuthController extends Controller
                 $user = Auth::user();
                 $token = JWTAuth::fromUser($user);
                 return response()->json([
-                    'user' => $user,
-                    'token' => $token,
+                    'success' => true,
+                    'message' => 'Login successful',
+                    'data' => [
+                        'user' => $user,
+                        'token' => $token
+                    ]
                 ], 200);
             } else {
-                return response()->json(['error' => 'Unauthorized'], 401);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized'], 401);
             }
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 401);
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()], 401);
         }
     }
 
@@ -56,9 +67,13 @@ class AuthController extends Controller
     {
         try {
             JWTAuth::invalidate(JWTAuth::getToken());
-            return response()->json(['message' => 'Successfully logged out'], 200);
+            return response()->json([
+                'success' => true,
+                'message' => 'Successfully logged out'], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to log out'], 500);
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to log out'], 500);
         }
     }
 
@@ -66,9 +81,15 @@ class AuthController extends Controller
     {
         try {
             $token = JWTAuth::refresh(JWTAuth::getToken());
-            return response()->json(['token' => $token], 200);
+            return response()->json([
+                'success' => true,
+                'token' => $token
+            ], 200);
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to refresh token'], 500);
+            return response()->json([
+                'success' => false,
+                'error' => 'Failed to refresh token'
+            ], 500);
         }
     }
 }

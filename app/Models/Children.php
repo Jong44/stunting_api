@@ -13,6 +13,7 @@ class Children extends Model
         'name',
         'birth_date',
         'gender',
+        'parent_id'
     ];
 
     public function parent()

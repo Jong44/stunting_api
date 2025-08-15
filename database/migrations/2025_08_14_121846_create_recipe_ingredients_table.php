@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('growths', function (Blueprint $table) {
+        Schema::create('recipe_ingredients', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('child_id')->constrained('childrens')->onDelete('cascade');
-            $table->decimal('weight', 5, 2)->nullable();
-            $table->decimal('height', 5, 2)->nullable();
-            $table->date('measurement_date')->nullable();
+            $table->uuid('recipe_id');
+            $table->text('ingredient');
             $table->timestamps();
+        });
+
+        Schema::table('recipe_ingredients', function (Blueprint $table) {
+            $table->foreign('recipe_id')->references('id')->on('reseps')->onDelete('cascade');
         });
     }
 
@@ -26,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('growths');
+        Schema::dropIfExists('recipe_ingredients');
     }
 };

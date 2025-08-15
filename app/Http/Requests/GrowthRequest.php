@@ -23,19 +23,17 @@ class GrowthRequest extends FormRequest
     {
         if ($this->isMethod('post')) {
             return [
-                'child_id' => 'required|uuid|exists:children,id',
+                'child_id' => 'required|uuid',
                 'weight' => 'required|numeric|min:0',
                 'height' => 'required|numeric|min:0',
-                'head_circumference' => 'nullable|numeric|min:0',
-                'date' => 'required|date',
+                'measurement_date' => 'required|date',
             ];
         } elseif ($this->isMethod('put') || $this->isMethod('patch')) {
             return [
-                'child_id' => 'sometimes|required|uuid|exists:children,id',
+                'child_id' => 'sometimes|required|uuid',
                 'weight' => 'sometimes|required|numeric|min:0',
                 'height' => 'sometimes|required|numeric|min:0',
-                'head_circumference' => 'sometimes|nullable|numeric|min:0',
-                'date' => 'sometimes|required|date',
+                'measurement_date' => 'sometimes|required|date',
             ];
         }
         return [];
@@ -46,17 +44,14 @@ class GrowthRequest extends FormRequest
         return [
             'child_id.required' => 'ID anak harus diisi.',
             'child_id.uuid' => 'ID anak harus berupa UUID.',
-            'child_id.exists' => 'ID anak tidak ditemukan.',
             'weight.required' => 'Berat badan harus diisi.',
             'weight.numeric' => 'Berat badan harus berupa angka.',
             'weight.min' => 'Berat badan tidak boleh kurang dari 0.',
             'height.required' => 'Tinggi badan harus diisi.',
             'height.numeric' => 'Tinggi badan harus berupa angka.',
             'height.min' => 'Tinggi badan tidak boleh kurang dari 0.',
-            'head_circumference.numeric' => 'Lingkar kepala harus berupa angka.',
-            'head_circumference.min' => 'Lingkar kepala tidak boleh kurang dari 0.',
-            'date.required' => 'Tanggal pengukuran harus diisi.',
-            'date.date' => 'Format tanggal tidak valid.',
+            'measurement_date.required' => 'Tanggal pengukuran harus diisi.',
+            'measurement_date.date' => 'Format tanggal tidak valid.',
         ];
     }
 
